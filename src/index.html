@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Map of Interest</title>
+        <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&v=3&callback=gmap.init"></script>
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+        <link rel="stylesheet" href="css/responsive.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="control">
+                <input data-bind="textInput: filterText, disable: sortMode">
+                <button data-bind="click: editLocation">Edit</button>
+                <button data-bind="disable: filterText, click: enableTransport">Transport</button>
+                <button data-bind="click: handleAdd, visible: editMode">Add</button>
+                <input data-bind="textInput: newLocation, visible: editMode">
+                <button data-bind="click: toggleSort, visible: editMode">Sort</button>
+                <ul id="list" data-bind="foreach: filteredLocations, sortable: locations">
+                    <li>
+                        <p class="left", data-bind="text: name, click: $root.openInfoWindow"></p>
+                        <button class="right", data-bind="visible: $root.editMode, disable: $root.sortMode, click: $root.handleDelete">Delete</button>
+                        <div data-bind="if: !$root.filterText() && $index() < ($root.locations().length - 1), visible: $root.transportMode">
+                            <p>Directions Template</p>
+                            <button data-bind="click: $root.requestDirection">Request</button>
+                            <button>Details</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div id="map"></div>
+            <div class="gallery" data-bind="visible: showPhotos">
+                <button data-bind="click: closePhoto">Close</button>
+                <div class="img-container" data-bind="foreach: photoArray">
+                    <img data-bind="attr: {src: url}">
+                </div>
+            </div>
+        </div>
+        <script src="js/app.js"></script>
+        <script src="js/gmapapi.js"></script>
+        <script src="js/flickr.js"></script>
+        <script src="js/wiki.js"></script>
+    </body>
+</html>
