@@ -1,24 +1,75 @@
 /*global ko, map, gmap, $, wiki, flickr, google*/
+var TimeModel = function() {
+    this.directionOK = ko.observable(false);
+    this.value = ko.observable();
+    this.current = new Date();
+};
+
+TimeModel.prototype.deselectable = true;
+TimeModel.prototype.showCalendar = false;
+TimeModel.prototype.showToday = true;
+TimeModel.prototype.showTime = true;
+TimeModel.prototype.showNow = true;
+TimeModel.prototype.militaryTime = false;
+TimeModel.prototype.min = null;
+TimeModel.prototype.max = null;
+TimeModel.prototype.autoclose = true;
+TimeModel.prototype.strings = {
+    months: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
+    days: [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ],
+    time: ["AM", "PM"]
+}
+
 var locations = ko.observableArray([
     {
-        name: 'Tokyo Station', 
-        position: {lat: 35.681298, lng: 139.7662469}
+        name: 'London Gatwick Airport', 
+        position: {lat: 51.1536621, lng: -0.18206290000000536},
+        transport: {
+            time: new TimeModel(),
+            type: 'TRANSIT',
+            duration: ko.observable(''),
+            distance: ko.observable('')
+        }
     },
     {
-        name: 'Shinjuku',
-        position: {lat: 35.69384, lng: 139.703549}
+        name: 'Kings Cross Station London',
+        position: {lat: 51.53170300000001, lng: -0.12431049999997867},
+        transport: {
+            time: new TimeModel(),
+            type: 'TRANSIT',
+            duration: ko.observable(''),
+            distance: ko.observable('')           
+        }
     },
     {
-        name: 'Shinakawa',
-        position: {lat: 35.628471, lng: 139.73876}
+        name: 'Emirates Stadium',
+        position: {lat: 51.55572979999999, lng: -0.10831180000002405},
+        transport: {
+            time: new TimeModel(),
+            type: 'TRANSIT',
+            duration: ko.observable(''),
+            distance: ko.observable('')          
+        }
     },
     {
-        name: 'Yokohama',
-        position: {lat: 35.465798, lng: 139.622314}
+        name: 'Canary Wharf',
+        position: {lat: 51.5054306, lng: -0.023533300000053714},
+        transport: {
+            time: new TimeModel(),
+            type: 'TRANSIT',
+            duration: ko.observable(''),
+            distance: ko.observable('')         
+        }
     },
     {
-        name: 'Minato',
-        position: {lat: 35.658068, lng: 139.751599}
+        name: 'London Bridge',
+        position: {lat: 51.5078788, lng: -0.08773210000003928},
+        transport: {
+            time: new TimeModel(),
+            type: 'TRANSIT',
+            duration: ko.observable(''),
+            distance: ko.observable('')               
+        }
     }
 ]);
 
@@ -60,6 +111,10 @@ var ViewModel = function() {
     
     self.transportMode = ko.observable(false);
     
+    self.transportType = 'DRIVING';
+    
+    self.showDirections = ko.observable(false);
+    
     self.showPhotos = ko.observable(false);
     
     self.filterText = ko.observable('');
@@ -97,6 +152,10 @@ var ViewModel = function() {
         if(self.showPhotos()) {
             self.showPhotos(false);
         }
+    };
+    
+    self.detailedDirections = function() {
+        self.showDirections(true);
     };
     
     self.openInfoWindow = function() {
@@ -183,6 +242,12 @@ var ViewModel = function() {
         if (self.newLocation.length > 0) {
             var loc = {};
             loc.name = self.newLocation;
+            loc.transport = {
+                time: new TimeModel(),
+                type: 'TRANSIT',
+                duration: ko.observable(''),
+                distance: ko.observable('')         
+            };
             gmap.geocode(loc);
         } else {
             console.log('Input field cannot be empty');
@@ -208,10 +273,18 @@ var ViewModel = function() {
     };
     
     self.requestDirection = function() {
+        this.directionOK = ko.observable(false);
         var origin = this;
         var index = locations.indexOf(origin);
         var dest = locations()[index + 1];
-        gmap.direction(origin, dest);
+        var type = origin.transport.type;
+        gmap.direction(origin, dest, type);
+    };
+    
+    self.setDirections = function(loc, obj) {
+        loc.transport.duration(obj.duration);
+        loc.transport.distance(obj.distance);
+        loc.transport.time.directionOK(true);
     };
 };
 

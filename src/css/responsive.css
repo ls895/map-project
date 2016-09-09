@@ -43,7 +43,11 @@ ul {
     width: 25%;
 }
 
+#direction {
+    width: 20%;
+}
+
 #map {
-    width: 75%;
+    width: 55%;
     height: 100%;
 }
