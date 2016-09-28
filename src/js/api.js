@@ -76,13 +76,24 @@ flickr.sendRequest = function(loc) {
         url: flickr.URL
     }).done((function(loc) {
         return function(data) {
-            VM.photoArray.removeAll();
             var photo = data.photos.photo;
-            VM.openPhoto();
-            for (var i = 0; i < photo.length; i++) {
+            var tempArray = [];
+            VM.thumbnail(flickr.buildImageURL(photo[0]));
+            for (var i = 0; i < 20; i++) {
                 var ImageURL = flickr.buildImageURL(photo[i]);
-                VM.photoArray.push({url: ImageURL});
+                tempArray.push({url: ImageURL});
             }
+            VM.photoArray(tempArray);
+            $('.offcanvas2').imagesLoaded(function() {
+                if (VM.masonry) {
+                    $('.offcanvas2').masonry('destroy');
+                    VM.masonry = false;
+                }
+                $('.offcanvas2').masonry({
+                    containerStyle: {position: 'absolute'}
+                });
+                VM.masonry = true;
+            });
         };
     })(loc)).fail(function() {
         alert('Flickr Image for location: ' + loc.name + ' cannot be loaded.');
@@ -97,7 +108,7 @@ flickr.buildURL = function (loc) {
     flickr.URL += '&content_type=' + 1;
     flickr.URL += '&sort=' + 'relevance';
     flickr.URL += '&privacy_filter=' + 1;
-    flickr.URL += '&per_page=' + 10;
+    flickr.URL += '&per_page=' + 20;
 }
 
 flickr.buildImageURL = function(photo) {
@@ -113,7 +124,6 @@ var wiki = {};
 
 wiki.sendRequest = function(loc) {
     wiki.buildURL(loc.name);
-    console.log(wiki.URL)
     $.ajax({
         url: wiki.URL,
         dataType: 'jsonp'
@@ -121,7 +131,7 @@ wiki.sendRequest = function(loc) {
         return function(data) {
             var pages = data.query.pages;
             var extract = pages[Object.keys(pages)[0]].extract;
-            VM.setInfoWindowContent(loc, (loc.infoWindow.content + extract));
+            VM.setWikiContent(loc, extract);
         }
     })(loc)).fail(function() {
         alert('Wikipedia content for ' + loc.name + ' cannot be loaded');

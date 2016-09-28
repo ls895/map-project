@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/css/bootstrap.min.css">
         <link rel="stylesheet" href="css/ko-calendar.min.css">
         <link rel="stylesheet" href="css/empty.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
         <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
         <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
         <script src="js/jquery.ui.touch-punch.min.js"></script>
@@ -15,40 +16,124 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/js/bootstrap.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
         <script src="js/ko-calendar.min.js"></script>
-
+        <script src="https://unpkg.com/masonry-layout@4.1/dist/masonry.pkgd.min.js"></script>
+        <script src="https://npmcdn.com/imagesloaded@4.1/imagesloaded.pkgd.min.js"></script>
     </head>
     <body>
-        <div class="">
-            <div class="">
-                <input data-bind="textInput: filterText, disable: sortMode">
-                <button data-bind="click: editLocation">Edit</button>
-                <button data-bind="disable: filterText, click: enableTransport">Transport</button>
-                <button data-bind="click: handleAdd, visible: editMode">Add</button>
-                <input data-bind="textInput: newLocation, visible: editMode">
-                <button data-bind="click: toggleSort, visible: editMode">Sort</button>
-                <ul id="list" data-bind="foreach: filteredLocations, sortable: locations">
-                    <li>
-                        <p class="left", data-bind="text: name, click: $root.openInfoWindow"></p>
-                        <button class="right", data-bind="visible: $root.editMode, disable: $root.sortMode, click: $root.handleDelete">Delete</button>
-                        <div data-bind="if: !$root.filterText() && $index() < ($root.locations().length - 1), visible: $root.transportMode">
-                            <input type="radio" value="DRIVING" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">Driving
-                            <input type="radio" value="TRANSIT" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">Public Transit
-                            <input type="radio" value="WALKING" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">Walking
-                            <div data-bind="calendar: transport.time"></div>
-                            <p data-bind="text: transport.duration"></p>
-                            <p data-bind="text: transport.distance"></p>
-                            <button data-bind="click: $root.requestDirection">Send Request</button>
-                            <button data-bind="visible: transport.time.directionOK, click: $root.detailedDirections">Show Details</button>
+        <div class="container-fluid">
+            <nav class="navbar navbar-light bg-faded">
+                <a class="navbar-brand">Neighborhood Map</a>
+                <div class="nav navbar-nav">
+                    <a class="nav-item nav-link" data-bind="click: enablePlaces" href="#">Places <span class="sr-only">(current)</span></a>
+                    <a class="nav-item nav-link" data-bind="click: enableTransport" href="#">Transports</a>
+                </div>
+            </nav>
+            <div class="row main">
+                <div class="col-xs-12 col-md-3 control-pane" data-bind="css: {'toggle-left': !placesPage()}">
+                    <a role="button" class="btn btn-secondary control-left" data-bind="click: showMap ">
+                        <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                    </a>
+                    <div class="row control-pane detail-pane" data-bind="with: activeLocation, css: {'detail-left': showDetail}">
+                        <div class="col-xs-12">
+                            <figure>
+                                <a role="button" class="btn btn-secondary top-right photo-button" data-bind="click: $root.openPhoto">
+                                    <i class="fa fa-braille" aria-hidden="true"></i>
+                                </a>
+                                <a role="button" class="btn btn-secondary top-left" data-bind="click: $root.closeDetail">
+                                    <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                                </a>
+                                <img class="img-fluid" data-bind="attr: {src: $root.thumbnail}">
+                                <figcaption data-bind="text: name"></figcaption>
+                            </figure>
+                            <p data-bind="text: wikiExtract"></p>
                         </div>
-                    </li>
-                </ul>
-            </div>
-            <div id="direction" data-bind="visible: showDirections"></div>
-            <div id="map"></div>
-            <div class="gallery" data-bind="visible: showPhotos">
-                <button data-bind="click: closePhoto">Close</button>
-                <div class="img-container" data-bind="foreach: photoArray">
-                    <img data-bind="attr: {src: url}">
+                    </div>
+                    <div class="row">
+                        <div class="input-group">
+                            <input class="form-control" placeholder="Search Text" data-bind="textInput: filterText, disable: sortMode">
+                            <span class="input-group-btn">
+                                <a role="button" class="btn btn-secondary" data-bind="click: editLocation">
+                                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <ul class="col-xs-12" id="list" data-bind="foreach: filteredLocations, sortable: locations">
+                            <li class="row">
+                                <h6 class="col-xs-10 location-name", data-bind="text: name, click: $root.openInfoWindow"></h6>
+                                <a role="button" class="btn btn-secondary btn-sm trash" data-bind="visible: $root.editMode, disable: $root.sortMode, click: $root.handleDelete">
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="row" data-bind="visible: editMode">
+                        <div class="input-group">
+                            <input class="form-control" placeholder="Add Places" data-bind="textInput: newLocation">
+                            <span class="input-group-btn">
+                                <a role="button" class="btn btn-secondary" data-bind="click: handleAdd">
+                                    <i class="fa fa-plus-square-o" aria-hidden="true"></i>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-3 control-pane" data-bind="css: {'toggle-left': !transportPage()}">
+                    <a role="button" class="btn btn-secondary control-left" data-bind="click: showMap">
+                        <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                    </a>
+                    <div class="row control-pane detail-pane" data-bind="css: {'detail-left': showDirections}">
+                        <a role="button" class="btn btn-secondary top-left" data-bind="click: $root.closeDirections">
+                            <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                        </a>
+                        <div class="col-xs-12" id="direction">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <ul class="col-xs-12" id="list" data-bind="foreach: filteredLocations, sortable: locations">
+                            <li class="row">
+                                <h6 class="col-xs-10 location-name", data-bind="text: name"></h6>
+                                <div data-bind="if: $index() < ($root.locations().length - 1)">
+                                    <div class="row custom-controls-stacked">
+                                        <label class="col-xs-12 custom-control custom-radio">
+                                            <input class="custom-control-input" type="radio" value="DRIVING" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">
+                                            <span class="custom-control-indicator"></span>
+                                            <span class="custom-control-description">Driving</span>
+                                        </label>
+                                        <label class="col-xs-12 custom-control custom-radio">
+                                            <input class="custom-control-input" type="radio" value="TRANSIT" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">
+                                            <span class="custom-control-indicator"></span>
+                                            <span class="custom-control-description">Public Transit</span>
+                                        </label>
+                                        <label class="col-xs-12 custom-control custom-radio">
+                                            <input class="custom-control-input" type="radio" value="WALKING" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">
+                                            <span class="custom-control-indicator"></span>
+                                            <span class="custom-control-description">Walking</span>
+                                        </label>
+                                    </div>
+                                    <a class="btn btn-secondary btn-sm" data-toggle="collapse" aria-expanded="false" data-bind="attr: {'aria-controls': 'leg' + $index(), href: '#leg' + $index()}">
+                                        Pick Time
+                                     </a>
+                                    <div class="collapse" data-bind="attr: {id: 'leg' + $index()}">
+                                        <div class="card card-block" data-bind="calendar: transport.time"></div>
+                                    </div>
+                                    <p data-bind="text: 'Time: ' + transport.duration()"></p>
+                                    <p data-bind="text: 'Distance: ' + transport.distance()"></p>
+                                    <a role="button" class="btn btn-secondary btn-sm" data-bind="click: $root.requestDirection">Send Request</a>
+                                    <a role="button" class="btn btn-secondary btn-sm" data-bind="visible: transport.time.directionOK, click: $root.detailedDirections">Show Details</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-9 right hide-overflow map-pane">
+                    <div class="row offcanvas2" data-bind="css: {active2: showPhotos}, foreach: photoArray">
+                        <img class="col-xs-4 img-fluid nopadding" data-bind="attr: {src: url}">
+                    </div>
+                    <div class="row map-container">
+                        <div class="col-xs-12" id="map"></div>
+                    </div>
                 </div>
             </div>
         </div>

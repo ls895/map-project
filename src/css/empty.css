@@ -1,0 +1,145 @@
+html, body, .container-fluid, .main, .right, .map-container {
+    height: 100%;
+}
+
+body {
+    min-width: 320px;
+    overflow-x: hidden;
+}
+
+#map {
+    height: 100%;
+}
+
+.control-pane {
+    
+}
+
+.map-pane {
+    
+}
+
+ul {
+    list-style: none;
+    margin-top: 1rem;
+}
+
+li {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.top-left {
+    position: absolute;
+    z-index: 2;
+    left: 1rem;
+}
+
+.top-right {
+    position: absolute;
+    z-index: 2;
+    right: 1rem;
+}
+
+.photo-button {
+    display: none;
+}
+
+.trash {
+    vertical-align: sub;
+}
+
+.location-name {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.offcanvas2 {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 10;
+    background-color: #fff;
+    -webkit-transition: .3s ease all;
+    transition: .3s ease all;
+}
+
+.offcanvas2 {
+    right: -100%;    
+}
+
+.active2 {
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%);
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.container-fluid {
+    margin: 0;
+    padding: 0;
+}
+
+.hide-overflow {
+    overflow-x: hidden;
+}
+
+@media (min-width: 544px) {
+    .photo-button {
+        display: initial;
+    }
+}
+
+.control-pane {
+    position: absolute;
+    z-index: 1;
+    background-color: #fff;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    -webkit-transition: .3s ease all;
+    transition: .3s ease all;
+}
+
+.toggle-left {
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%);
+}
+
+.control-left {
+    position: absolute;
+    right: 0;
+    top: 40%;
+    z-index: 1;
+}
+
+.detail-pane {
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    left: -100%;    
+}
+
+.detail-left {
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
+}
+
+.map-pane {
+    position: absolute;
+    z-index: 0;
+}
+
+
+@media (max-width: 543px) {
+    .elevated-map {
+        z-index: 2;
+    }
+}
+
+.right-in {
+    
+}

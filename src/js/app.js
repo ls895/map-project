@@ -29,17 +29,21 @@ var locations = ko.observableArray([
             type: 'TRANSIT',
             duration: ko.observable(''),
             distance: ko.observable('')
-        }
+        },
+        wikiExtract: ko.observable(),
+        thumbnail: ko.observable()
     },
     {
-        name: 'Kings Cross Station London',
+        name: "King's Cross",
         position: {lat: 51.53170300000001, lng: -0.12431049999997867},
         transport: {
             time: new TimeModel(),
             type: 'TRANSIT',
             duration: ko.observable(''),
             distance: ko.observable('')           
-        }
+        },
+        wikiExtract: ko.observable(),
+        thumbnail: ko.observable()
     },
     {
         name: 'Emirates Stadium',
@@ -49,7 +53,9 @@ var locations = ko.observableArray([
             type: 'TRANSIT',
             duration: ko.observable(''),
             distance: ko.observable('')          
-        }
+        },
+        wikiExtract: ko.observable(),
+        thumbnail: ko.observable()
     },
     {
         name: 'Canary Wharf',
@@ -59,7 +65,9 @@ var locations = ko.observableArray([
             type: 'TRANSIT',
             duration: ko.observable(''),
             distance: ko.observable('')         
-        }
+        },
+        wikiExtract: ko.observable(),
+        thumbnail: ko.observable()
     },
     {
         name: 'London Bridge',
@@ -69,17 +77,22 @@ var locations = ko.observableArray([
             type: 'TRANSIT',
             duration: ko.observable(''),
             distance: ko.observable('')               
-        }
+        },
+        wikiExtract: ko.observable(),
+        thumbnail: ko.observable()
     }
 ]);
 
 ko.bindingHandlers.sortable = {
     update: function(element, valueAccessor, viewModel, bindingContext) {
-        var sortMode = bindingContext.sortMode();
+        var editMode = bindingContext.editMode();
         var list = $(element);
         var locations = valueAccessor();
-        if (sortMode) {
+        if (editMode) {
             var options = {
+                sort: function(event, ui) {
+                    VM.disableFilter();
+                },
                 update: function(event, ui) {
                     var loc = ko.dataFor(ui.item[0]);
                     var newIndex = ui.item.index();
@@ -91,6 +104,7 @@ ko.bindingHandlers.sortable = {
                         c.splice(newIndex, 0, loc);
                         locations(c);
                     }
+                    VM.enableFilter();
                 }
             };
             list.sortable(options);
@@ -98,6 +112,7 @@ ko.bindingHandlers.sortable = {
             if (list.sortable( 'instance' )) {
                 list.sortable('destroy');
             }
+            VM.enableFilter();
         }
     }
 };
@@ -105,11 +120,15 @@ ko.bindingHandlers.sortable = {
 var ViewModel = function() {
     var self = this;
     
+    self.thumbnail = ko.observable();
+    
     self.editMode = ko.observable(false);
     
     self.sortMode = ko.observable(false);
     
-    self.transportMode = ko.observable(false);
+    self.placesPage = ko.observable(true);
+    
+    self.transportPage = ko.observable(false);
     
     self.transportType = 'DRIVING';
     
@@ -117,22 +136,19 @@ var ViewModel = function() {
     
     self.showPhotos = ko.observable(false);
     
+    self.showDetail = ko.observable(false);
+    
     self.filterText = ko.observable('');
     
     self.newLocation = '';
+    
+    self.activeLocation = ko.observable();
 
     self.locations = locations;
     
     self.photoArray = ko.observableArray([]);
     
-    self.toggleSort = function() {
-        if (self.sortMode()) {
-            self.sortMode(false);    
-        } else {
-            self.filterText('');
-            self.sortMode(true);
-        }
-    };
+    self.masonry = false;
     
     self.editLocation = function() {
         if (self.editMode()) {
@@ -143,31 +159,40 @@ var ViewModel = function() {
     };
     
     self.openPhoto = function() {
-        if (!self.showPhotos()) {
+        if (self.showPhotos()) {
+            self.showPhotos(false);
+        } else {
             self.showPhotos(true);
         }
     };
     
     self.closePhoto = function() {
-        if(self.showPhotos()) {
-            self.showPhotos(false);
-        }
+        self.showPhotos(false);
     };
     
     self.detailedDirections = function() {
         self.showDirections(true);
     };
     
+    self.closeDirections = function() {
+        self.showDirections(false);
+    }
+    
     self.openInfoWindow = function() {
-        self.closeInfoWindow(this);
+        self.thumbnail('');
+        self.activeLocation(this);
+        for (var i = 0; i < locations().length; i++) {
+            self.closeInfoWindow(locations()[i]);
+        }
         this.infoWindow = new google.maps.InfoWindow({
-            content: '<h2>' + this.name + '</h2>'
+            content: '<h4>' + this.name + '</h4>'
         });
         this.infoWindow.open(map, this.marker);
         self.dropMarker.call(this);
         self.setCenter(this);
         wiki.sendRequest(this);
         flickr.sendRequest(this);
+        self.showDetail(true);
     };
     
     self.closeInfoWindow = function(loc) {
@@ -178,8 +203,8 @@ var ViewModel = function() {
         }
     };
     
-    self.setInfoWindowContent = function(loc, content) {
-        loc.infoWindow.setContent(content);
+    self.setWikiContent = function(loc, extract) {
+        loc.wikiExtract(extract);
     };
     
     self.dropMarker = function() {
@@ -248,6 +273,7 @@ var ViewModel = function() {
                 duration: ko.observable(''),
                 distance: ko.observable('')         
             };
+            loc.wikiExtract = ko.observable();
             gmap.geocode(loc);
         } else {
             console.log('Input field cannot be empty');
@@ -265,11 +291,33 @@ var ViewModel = function() {
     };
     
     self.enableTransport = function() {
-        if (self.transportMode()) {
-            self.transportMode(false);
-        } else {
-            self.transportMode(true);
-        }
+        self.disableFilter();
+        self.editMode(false);
+        self.placesPage(false);
+        self.transportPage(true);
+        self.showPhotos(false);
+        self.showDetail(false);
+    };
+    
+    self.enablePlaces = function() {
+        self.showDirections(false);
+        self.transportPage(false);
+        self.placesPage(true);
+        self.enableFilter();
+    };
+    
+    self.showMap = function() {
+        self.placesPage(false);
+        self.transportPage(false);
+    };
+    
+    self.enableFilter = function() {
+        VM.sortMode(false);
+    };
+    
+    self.disableFilter = function() {
+        self.filterText('');
+        self.sortMode(true);
     };
     
     self.requestDirection = function() {
@@ -285,6 +333,10 @@ var ViewModel = function() {
         loc.transport.duration(obj.duration);
         loc.transport.distance(obj.distance);
         loc.transport.time.directionOK(true);
+    };
+    
+    self.closeDetail = function() {
+        self.showDetail(false);
     };
 };
 
