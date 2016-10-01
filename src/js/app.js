@@ -148,7 +148,7 @@ var ViewModel = function() {
     
     self.photoArray = ko.observableArray([]);
     
-    self.masonry = false;
+    // self.masonry = false;
     
     self.editLocation = function() {
         if (self.editMode()) {
@@ -173,10 +173,6 @@ var ViewModel = function() {
     self.detailedDirections = function() {
         self.showDirections(true);
     };
-    
-    self.closeDirections = function() {
-        self.showDirections(false);
-    }
     
     self.openInfoWindow = function() {
         self.thumbnail('');
@@ -338,6 +334,12 @@ var ViewModel = function() {
     self.closeDetail = function() {
         self.showDetail(false);
     };
+    
+    
+    self.closeLast = function() {
+        self.showDetail(false);
+        self.showDirections(false);
+    }
 };
 
 var VM = new ViewModel();

@@ -84,16 +84,16 @@ flickr.sendRequest = function(loc) {
                 tempArray.push({url: ImageURL});
             }
             VM.photoArray(tempArray);
-            $('.offcanvas2').imagesLoaded(function() {
-                if (VM.masonry) {
-                    $('.offcanvas2').masonry('destroy');
-                    VM.masonry = false;
-                }
-                $('.offcanvas2').masonry({
-                    containerStyle: {position: 'absolute'}
-                });
-                VM.masonry = true;
-            });
+            // $('.offcanvas2').imagesLoaded(function() {
+            //     if (VM.masonry) {
+            //         $('.offcanvas2').masonry('destroy');
+            //         VM.masonry = false;
+            //     }
+            //     $('.offcanvas2').masonry({
+            //         containerStyle: {position: 'absolute'}
+            //     });
+            //     VM.masonry = true;
+            // });
         };
     })(loc)).fail(function() {
         alert('Flickr Image for location: ' + loc.name + ' cannot be loaded.');

@@ -1,4 +1,4 @@
-html, body, .container-fluid, .main, .right, .map-container {
+html, body {
     height: 100%;
 }
 
@@ -7,7 +7,11 @@ body {
     overflow-x: hidden;
 }
 
-#map {
+.container-fluid, .control-pane, .map-pane {
+    height: calc(100% - 100px);
+}
+
+.main, .map-container, #map {
     height: 100%;
 }
 
@@ -29,22 +33,6 @@ li {
     margin-bottom: 0.5rem;
 }
 
-.top-left {
-    position: absolute;
-    z-index: 2;
-    left: 1rem;
-}
-
-.top-right {
-    position: absolute;
-    z-index: 2;
-    right: 1rem;
-}
-
-.photo-button {
-    display: none;
-}
-
 .trash {
     vertical-align: sub;
 }
@@ -54,23 +42,8 @@ li {
     margin-bottom: 0.5rem;
 }
 
-.offcanvas2 {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    z-index: 10;
-    background-color: #fff;
-    -webkit-transition: .3s ease all;
-    transition: .3s ease all;
-}
-
-.offcanvas2 {
-    right: -100%;    
-}
-
-.active2 {
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
+.traffic-buttons {
+    padding: 0;
 }
 
 .row {
@@ -83,21 +56,22 @@ li {
     padding: 0;
 }
 
+.navbar {
+    height: 50px;
+}
+
 .hide-overflow {
     overflow-x: hidden;
 }
 
 @media (min-width: 544px) {
-    .photo-button {
-        display: initial;
-    }
+
 }
 
 .control-pane {
     position: absolute;
     z-index: 1;
     background-color: #fff;
-    height: 100%;
     overflow-x: hidden;
     overflow-y: scroll;
     -webkit-transition: .3s ease all;
@@ -133,13 +107,19 @@ li {
     z-index: 0;
 }
 
-
 @media (max-width: 543px) {
-    .elevated-map {
-        z-index: 2;
-    }
+
 }
 
 .right-in {
     
+}
+
+.footer-pa {
+    text-align: center;
+}
+
+.footer-nav {
+    display: inline-block;
+    float: none;
 }
