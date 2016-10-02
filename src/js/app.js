@@ -134,7 +134,11 @@ var ViewModel = function() {
     
     self.showDirections = ko.observable(false);
     
-    self.showPhotos = ko.observable(false);
+    self.imageLoading = ko.observable(false);
+    
+    self.wikiLoading = ko.observable(false);
+    
+    self.directionLoading = ko.observable(false);
     
     self.showDetail = ko.observable(false);
     
@@ -148,8 +152,6 @@ var ViewModel = function() {
     
     self.photoArray = ko.observableArray([]);
     
-    // self.masonry = false;
-    
     self.editLocation = function() {
         if (self.editMode()) {
             self.editMode(false);
@@ -157,19 +159,7 @@ var ViewModel = function() {
             self.editMode(true);
         }
     };
-    
-    self.openPhoto = function() {
-        if (self.showPhotos()) {
-            self.showPhotos(false);
-        } else {
-            self.showPhotos(true);
-        }
-    };
-    
-    self.closePhoto = function() {
-        self.showPhotos(false);
-    };
-    
+
     self.detailedDirections = function() {
         self.showDirections(true);
     };
@@ -181,13 +171,14 @@ var ViewModel = function() {
             self.closeInfoWindow(locations()[i]);
         }
         this.infoWindow = new google.maps.InfoWindow({
-            content: '<h4>' + this.name + '</h4>'
+            content: '<p class="lead">' + this.name + '</p>'
         });
         this.infoWindow.open(map, this.marker);
         self.dropMarker.call(this);
         self.setCenter(this);
         wiki.sendRequest(this);
         flickr.sendRequest(this);
+        self.enablePlaces();
         self.showDetail(true);
     };
     
@@ -291,7 +282,7 @@ var ViewModel = function() {
         self.editMode(false);
         self.placesPage(false);
         self.transportPage(true);
-        self.showPhotos(false);
+        // self.showPhotos(false);
         self.showDetail(false);
     };
     
@@ -334,7 +325,6 @@ var ViewModel = function() {
     self.closeDetail = function() {
         self.showDetail(false);
     };
-    
     
     self.closeLast = function() {
         self.showDetail(false);

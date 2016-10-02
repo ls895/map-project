@@ -1,7 +1,5 @@
-/*global google, locations, VM, ko, map*/
+/*global google, locations, VM, ko, $*/
 var map;
-
-var geocoder, gdirection, gdisplay;
 
 var gmap = {};
 
@@ -10,11 +8,11 @@ gmap.init = function() {
         center: {lat: 0, lng: 180},
         zoom: 10
     });
-    geocoder = new google.maps.Geocoder();
-    gdirection = new google.maps.DirectionsService();
-    gdisplay = new google.maps.DirectionsRenderer;
-    gdisplay.setMap(map);
-    gdisplay.setPanel(document.getElementById("direction"));
+    gmap.geocoder = new google.maps.Geocoder();
+    gmap.gdirection = new google.maps.DirectionsService();
+    gmap.gdisplay = new google.maps.DirectionsRenderer;
+    gmap.gdisplay.setMap(map);
+    gmap.gdisplay.setPanel(document.getElementById("direction"));
     VM.initiateMarkers();
     VM.createComputedList();
     VM.setCenter(locations()[0]);
@@ -22,7 +20,7 @@ gmap.init = function() {
 };
 
 gmap.geocode = function(loc) {
-    geocoder.geocode({'address': loc.name}, function(results, status) {
+    gmap.geocoder.geocode({'address': loc.name}, function(results, status) {
         if (status === google.maps.GeocoderStatus.OK) {
             var position = {
                 lat: results[0].geometry.location.lat(),
@@ -38,9 +36,14 @@ gmap.geocode = function(loc) {
     });
 };
 
-
-
 gmap.direction = function(origin, dest, type) {
+    if (!origin.transport.time.value()) {
+        window.alert('Choose departure time before submitting request.');
+        return;
+    }
+    
+    VM.directionLoading(true);
+    
     gmap.directionRequest = {
         origin: origin.name,
         destination: dest.name,
@@ -53,13 +56,14 @@ gmap.direction = function(origin, dest, type) {
         }
     };
     
-    gdirection.route(gmap.directionRequest, function(response, status) {
+    gmap.gdirection.route(gmap.directionRequest, function(response, status) {
         if (status === google.maps.DirectionsStatus.OK) {
             var leg = response.routes[0].legs[0];
             VM.setDirections(origin, {distance: leg.distance.text, duration: leg.duration.text});
-            gdisplay.setDirections(response);
+            gmap.gdisplay.setDirections(response);
+            VM.directionLoading(false);
         } else {
-            window.alert('Directions request failed due to ' + status);
+            window.alert('Directions request failed due to ' + status + '.');
         } 
     });
 };
@@ -71,34 +75,20 @@ flickr.API_KEY = '148419e552f69164e56198093ea40634';
 flickr.URL = 'https://api.flickr.com/services/rest/?method=flickr.photos.search';
     
 flickr.sendRequest = function(loc) {
+    VM.imageLoading(true);
     flickr.buildURL(loc.name);
     $.ajax({
         url: flickr.URL
     }).done((function(loc) {
         return function(data) {
             var photo = data.photos.photo;
-            var tempArray = [];
             VM.thumbnail(flickr.buildImageURL(photo[0]));
-            for (var i = 0; i < 20; i++) {
-                var ImageURL = flickr.buildImageURL(photo[i]);
-                tempArray.push({url: ImageURL});
-            }
-            VM.photoArray(tempArray);
-            // $('.offcanvas2').imagesLoaded(function() {
-            //     if (VM.masonry) {
-            //         $('.offcanvas2').masonry('destroy');
-            //         VM.masonry = false;
-            //     }
-            //     $('.offcanvas2').masonry({
-            //         containerStyle: {position: 'absolute'}
-            //     });
-            //     VM.masonry = true;
-            // });
+            VM.imageLoading(false);
         };
     })(loc)).fail(function() {
-        alert('Flickr Image for location: ' + loc.name + ' cannot be loaded.');
+        window.alert('Flickr Image for location: ' + loc.name + ' cannot be loaded. Try again later.');
     });
-}
+};
 
 flickr.buildURL = function (loc) {
     flickr.URL += ('&api_key=' + flickr.API_KEY);
@@ -109,10 +99,10 @@ flickr.buildURL = function (loc) {
     flickr.URL += '&sort=' + 'relevance';
     flickr.URL += '&privacy_filter=' + 1;
     flickr.URL += '&per_page=' + 20;
-}
+};
 
 flickr.buildImageURL = function(photo) {
-    var ImageURL = 'https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg'
+    var ImageURL = 'https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg';
     ImageURL = ImageURL.replace('{farm-id}', photo.farm);
     ImageURL = ImageURL.replace('{server-id}', photo.server);
     ImageURL = ImageURL.replace('{id}', photo.id);
@@ -123,6 +113,7 @@ flickr.buildImageURL = function(photo) {
 var wiki = {};
 
 wiki.sendRequest = function(loc) {
+    VM.wikiLoading(true);
     wiki.buildURL(loc.name);
     $.ajax({
         url: wiki.URL,
@@ -132,13 +123,14 @@ wiki.sendRequest = function(loc) {
             var pages = data.query.pages;
             var extract = pages[Object.keys(pages)[0]].extract;
             VM.setWikiContent(loc, extract);
-        }
+            VM.wikiLoading(false);
+        };
     })(loc)).fail(function() {
-        alert('Wikipedia content for ' + loc.name + ' cannot be loaded');
+        window.alert('Wikipedia content for ' + loc.name + ' cannot be loaded. Try again later.');
     });
-}
+};
 
 wiki.buildURL = function(loc) {
     wiki.URL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&redirects=1&titles={title}';
     wiki.URL = wiki.URL.replace('{title}', loc);
-}
+};

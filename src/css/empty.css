@@ -1,9 +1,17 @@
+::-webkit-scrollbar {
+    width: 0px;  /* remove scrollbar space */
+    background: transparent;  /* optional: just make scrollbar invisible */
+}
+
 html, body {
     height: 100%;
 }
 
-body {
+body, .control-pane, .map-pane {
     min-width: 320px;
+}
+
+body {
     overflow-x: hidden;
 }
 
@@ -64,8 +72,34 @@ li {
     overflow-x: hidden;
 }
 
-@media (min-width: 544px) {
+.transport-text {
+    padding: 0;
+}
 
+@media (min-width: 768px) {
+    .map-pane {
+        left: 41.667%;
+    }
+    
+    .places, .transports, .map-pane {
+        padding: 0;
+    }
+    
+    .map-button {
+        display: none !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .map-pane {
+        left: 33.333%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .map-pane {
+        left: 25%;
+    }
 }
 
 .control-pane {
@@ -76,18 +110,7 @@ li {
     overflow-y: scroll;
     -webkit-transition: .3s ease all;
     transition: .3s ease all;
-}
-
-.toggle-left {
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
-}
-
-.control-left {
-    position: absolute;
-    right: 0;
-    top: 40%;
-    z-index: 1;
+    
 }
 
 .detail-pane {
@@ -107,12 +130,17 @@ li {
     z-index: 0;
 }
 
-@media (max-width: 543px) {
-
+.underlying-gone {
+    display: none;
 }
 
-.right-in {
+.toggle-left {
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%);
+}
     
+.time-picker {
+    padding: 0;
 }
 
 .footer-pa {
@@ -122,4 +150,8 @@ li {
 .footer-nav {
     display: inline-block;
     float: none;
+}
+
+@media (min-width: 544px) and (max-width: 1499px) {
+    
 }
