@@ -1,6 +1,6 @@
 ::-webkit-scrollbar {
-    width: 0px;  /* remove scrollbar space */
-    background: transparent;  /* optional: just make scrollbar invisible */
+    width: 0px;
+    background: transparent;
 }
 
 html, body {
@@ -21,14 +21,6 @@ body {
 
 .main, .map-container, #map {
     height: 100%;
-}
-
-.control-pane {
-    
-}
-
-.map-pane {
-    
 }
 
 ul {
@@ -150,8 +142,4 @@ li {
 .footer-nav {
     display: inline-block;
     float: none;
-}
-
-@media (min-width: 544px) and (max-width: 1499px) {
-    
 }

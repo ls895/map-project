@@ -1,10 +1,13 @@
-/*global ko, map, gmap, $, wiki, flickr, google*/
+/* global ko, map, gmap, $, wiki, flickr, google */
+
+// Constructor function for time object used in each location's time picker
 var TimeModel = function() {
     this.directionOK = ko.observable(false);
     this.value = ko.observable();
     this.current = new Date();
 };
 
+// Parameters for the time picker
 TimeModel.prototype.deselectable = true;
 TimeModel.prototype.showCalendar = false;
 TimeModel.prototype.showToday = true;
@@ -20,6 +23,7 @@ TimeModel.prototype.strings = {
     time: ["AM", "PM"]
 }
 
+// 5 default locations available for the application
 var locations = ko.observableArray([
     {
         name: 'London Gatwick Airport', 
@@ -83,11 +87,14 @@ var locations = ko.observableArray([
     }
 ]);
 
+// Custom Knockout binding to allow sorting the locations and altering their relative order
 ko.bindingHandlers.sortable = {
+    // Update function runs everytime the observable editMode changes its value
     update: function(element, valueAccessor, viewModel, bindingContext) {
         var editMode = bindingContext.editMode();
         var list = $(element);
         var locations = valueAccessor();
+        // Enable jQuery UI sortable functionality if edit mode is true
         if (editMode) {
             var options = {
                 sort: function(event, ui) {
@@ -109,6 +116,7 @@ ko.bindingHandlers.sortable = {
             };
             list.sortable(options);
         } else {
+            // Disable jQuery UI sortable functionality otherwise
             if (list.sortable( 'instance' )) {
                 list.sortable('destroy');
             }
@@ -117,6 +125,7 @@ ko.bindingHandlers.sortable = {
     }
 };
 
+// View model that provides logic and connection between View and Model
 var ViewModel = function() {
     var self = this;
     
@@ -173,6 +182,7 @@ var ViewModel = function() {
         this.infoWindow = new google.maps.InfoWindow({
             content: '<p class="lead">' + this.name + '</p>'
         });
+        // Open correct info window, drop a marker animation and send relative flickr and wiki ajax requests for the location
         this.infoWindow.open(map, this.marker);
         self.dropMarker.call(this);
         self.setCenter(this);
@@ -209,6 +219,7 @@ var ViewModel = function() {
             map: map,
             animation: google.maps.Animation.DROP
         });
+        // Closure is used to allow each marker's click listener callback refer to the correct location object
         loc.marker.addListener('click', (function(loc) {
             return function() {
                 self.openInfoWindow.call(loc);
@@ -222,6 +233,7 @@ var ViewModel = function() {
         }
     };
     
+    // Use ko.computed to return a proper array everytime there is a filter text entered
     self.createComputedList = function() {
         self.filteredLocations = ko.computed(function() {
             var target = self.filterText().toLowerCase();
@@ -250,6 +262,7 @@ var ViewModel = function() {
         map.setCenter(loc.position);
     };
     
+    // Create a new location object and add to the locations observable array
     self.handleAdd = function() {
         if (self.newLocation.length > 0) {
             var loc = {};
@@ -282,7 +295,6 @@ var ViewModel = function() {
         self.editMode(false);
         self.placesPage(false);
         self.transportPage(true);
-        // self.showPhotos(false);
         self.showDetail(false);
     };
     

@@ -1,8 +1,11 @@
-/*global google, locations, VM, ko, $*/
+/* global google, locations, VM, ko, $ */
+
+// Google Map API
 var map;
 
 var gmap = {};
 
+// Initiate Google Map, view model and apply Knockout bindings once Google Map API is loaded
 gmap.init = function() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 0, lng: 180},
@@ -19,6 +22,7 @@ gmap.init = function() {
     ko.applyBindings(VM);  
 };
 
+// Google geocoding service for adding new location
 gmap.geocode = function(loc) {
     gmap.geocoder.geocode({'address': loc.name}, function(results, status) {
         if (status === google.maps.GeocoderStatus.OK) {
@@ -36,6 +40,7 @@ gmap.geocode = function(loc) {
     });
 };
 
+// Google direction service for requesting travel directions between locations
 gmap.direction = function(origin, dest, type) {
     if (!origin.transport.time.value()) {
         window.alert('Choose departure time before submitting request.');
@@ -68,6 +73,7 @@ gmap.direction = function(origin, dest, type) {
     });
 };
 
+// Flickr API
 var flickr = {};
 
 flickr.API_KEY = '148419e552f69164e56198093ea40634';
@@ -90,6 +96,7 @@ flickr.sendRequest = function(loc) {
     });
 };
 
+// Construct the flickr URL for ajax request
 flickr.buildURL = function (loc) {
     flickr.URL += ('&api_key=' + flickr.API_KEY);
     flickr.URL += '&format=json';
@@ -101,6 +108,7 @@ flickr.buildURL = function (loc) {
     flickr.URL += '&per_page=' + 20;
 };
 
+// Construct the image urls from the flickr ajax returns
 flickr.buildImageURL = function(photo) {
     var ImageURL = 'https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg';
     ImageURL = ImageURL.replace('{farm-id}', photo.farm);
@@ -110,6 +118,8 @@ flickr.buildImageURL = function(photo) {
     return ImageURL;
 };
 
+
+// Wikipedia API
 var wiki = {};
 
 wiki.sendRequest = function(loc) {
