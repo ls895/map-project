@@ -51,5 +51,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-processhtml');
   grunt.loadNpmTasks('grunt-contrib-copy');
 
-  grunt.registerTask('default', ['uglify', 'cssmin', 'copy', 'processhtml', 'htmlmin']);
+  grunt.registerTask('default', ['uglify', 'cssmin', 'copy', 'processhtml']);
 };

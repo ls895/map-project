@@ -9,9 +9,9 @@ var gmap = {};
 gmap.init = function() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 0, lng: 180},
-        zoom: 10
+        zoom: 13
     });
-    gmap.geocoder = new google.maps.Geocoder();
+    gmap.service = new google.maps.places.PlacesService(map);
     gmap.gdirection = new google.maps.DirectionsService();
     gmap.gdisplay = new google.maps.DirectionsRenderer;
     gmap.gdisplay.setMap(map);
@@ -19,23 +19,40 @@ gmap.init = function() {
     VM.initiateMarkers();
     VM.createComputedList();
     VM.setCenter(locations()[0]);
-    ko.applyBindings(VM);  
+    ko.applyBindings(VM);
 };
 
-// Google geocoding service for adding new location
-gmap.geocode = function(loc) {
-    gmap.geocoder.geocode({'address': loc.name}, function(results, status) {
-        if (status === google.maps.GeocoderStatus.OK) {
+// Search for corresponding place using the Google Map API Place library
+gmap.searchPlace = function(loc) {
+    var request = {
+        query: loc.name
+    };
+    gmap.service.textSearch(request, function(results, status) {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            gmap.getDetail(results[0].place_id, loc);
+        } else {
+            window.alert('Google places search for ' + loc.name + ' was not successful for the following reason: ' + status);
+        }
+    });
+};
+
+// Search for the correspondig latlng value based on the Place library return
+gmap.getDetail = function(id, loc) {
+    var request = {
+        placeId: id
+    };
+    gmap.service.getDetails(request, function(place, status) {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
             var position = {
-                lat: results[0].geometry.location.lat(),
-                lng: results[0].geometry.location.lng()
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng()
             };
             loc.position = position;
             VM.addMarker(loc);
             VM.addLocation(loc);
             VM.setCenter(loc);
         } else {
-            alert('Geocode for ' + loc.name + ' was not successful for the following reason: ' + status);
+            window.alert('Google places detailed search for ' + id + ' was not successful for the following reason: ' + status);
         }
     });
 };
@@ -46,12 +63,10 @@ gmap.direction = function(origin, dest, type) {
         window.alert('Choose departure time before submitting request.');
         return;
     }
-    
     VM.directionLoading(true);
-    
     gmap.directionRequest = {
-        origin: origin.name,
-        destination: dest.name,
+        origin: origin.position,
+        destination: dest.position,
         travelMode: google.maps.TravelMode[type],
         transitOptions: {
             departureTime: origin.transport.time.value()
@@ -60,7 +75,6 @@ gmap.direction = function(origin, dest, type) {
             departureTime: origin.transport.time.value()
         }
     };
-    
     gmap.gdirection.route(gmap.directionRequest, function(response, status) {
         if (status === google.maps.DirectionsStatus.OK) {
             var leg = response.routes[0].legs[0];
@@ -69,7 +83,7 @@ gmap.direction = function(origin, dest, type) {
             VM.directionLoading(false);
         } else {
             window.alert('Directions request failed due to ' + status + '.');
-        } 
+        }
     });
 };
 
@@ -79,7 +93,7 @@ var flickr = {};
 flickr.API_KEY = '148419e552f69164e56198093ea40634';
 
 flickr.URL = 'https://api.flickr.com/services/rest/?method=flickr.photos.search';
-    
+
 flickr.sendRequest = function(loc) {
     VM.imageLoading(true);
     flickr.buildURL(loc.name);
@@ -103,9 +117,9 @@ flickr.buildURL = function (loc) {
     flickr.URL += '&nojsoncallback=1';
     flickr.URL += '&text=' + loc;
     flickr.URL += '&content_type=' + 1;
-    flickr.URL += '&sort=' + 'relevance';
+    flickr.URL += '&sort=' + 'interestingness-desc';
     flickr.URL += '&privacy_filter=' + 1;
-    flickr.URL += '&per_page=' + 20;
+    flickr.URL += '&per_page=' + 5;
 };
 
 // Construct the image urls from the flickr ajax returns
@@ -117,7 +131,6 @@ flickr.buildImageURL = function(photo) {
     ImageURL = ImageURL.replace('{secret}', photo.secret);
     return ImageURL;
 };
-
 
 // Wikipedia API
 var wiki = {};

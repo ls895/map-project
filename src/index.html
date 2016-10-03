@@ -3,14 +3,15 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Map of Interest</title>
-        <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&v=3&callback=gmap.init"></script>
+        <title>Map of Interest for UK</title>
+        <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&v=3&libraries=places&callback=gmap.init"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/css/bootstrap.min.css">
         <link rel="stylesheet" href="css/ko-calendar.min.css">
         <!-- build:css inline ../dist/css/style.min.css -->
         <link rel="stylesheet" href="css/style.css">
         <!-- /build -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+        <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&libraries=places"></script>-->
         <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
         <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
         <script src="js/jquery.ui.touch-punch.min.js"></script>
@@ -21,9 +22,9 @@
     </head>
     <body>
         <nav class="navbar navbar-light bg-faded">
-            <a class="navbar-brand">Neighborhood Map</a>
+            <a class="navbar-brand">Map of Interest</a>
             <div class="nav navbar-nav">
-                <a class="nav-item nav-link" data-bind="click: enablePlaces" href="#">Places <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" data-bind="click: enablePlaces" href="#">Places<span class="sr-only">(current)</span></a>
                 <a class="nav-item nav-link" data-bind="click: enableTransport" href="#">Transports</a>
             </div>
         </nav>
