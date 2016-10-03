@@ -133,17 +133,13 @@ ko.bindingHandlers.sortable = {
         // Enable jQuery UI sortable functionality if editMode is true
         if (editMode) {
             var options = {
-                // Disable the filtering feature when sorting is underway so sorting is done on the correct underlying model
-                start: function(event, ui) {
-                    VM.disableFilter();
-                },
-                stop: function(event, ui) {
-                    VM.enableFilter();
-                },
+                // Rearrange the array index of the locations in the model to correctly reflect the UI change
                 update: function(event, ui) {
                     var loc = ko.dataFor(ui.item[0]);
                     var newIndex = ui.item.index();
+                    console.log('update 1 newIndex ' + newIndex)
                     var oldIndex = locations.indexOf(loc);
+                    console.log('update 1 oldIndex ' + oldIndex)
                     if (oldIndex != newIndex) {
                         var c = locations();
                         locations([]);
@@ -151,7 +147,6 @@ ko.bindingHandlers.sortable = {
                         c.splice(newIndex, 0, loc);
                         locations(c);
                     }
-                    VM.enableFilter();
                 }
             };
             list.sortable(options);
@@ -160,7 +155,6 @@ ko.bindingHandlers.sortable = {
             if (list.sortable( 'instance' )) {
                 list.sortable('destroy');
             }
-            VM.enableFilter();
         }
     }
 };
@@ -204,8 +198,10 @@ var ViewModel = function() {
     self.editLocation = function() {
         if (self.editMode()) {
             self.editMode(false);
+            self.enableFilter();
         } else {
             self.editMode(true);
+            self.disableFilter();
         }
     };
 
@@ -273,7 +269,7 @@ var ViewModel = function() {
         }
     };
 
-    // Use ko.computed to return a proper array everytime there is a filter text entered
+    // Use ko.computed to return a proper array everytime when there is a filter text entered
     self.createComputedList = function() {
         self.filteredLocations = ko.computed(function() {
             var target = self.filterText().toLowerCase();
