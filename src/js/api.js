@@ -94,6 +94,7 @@ flickr.API_KEY = '148419e552f69164e56198093ea40634';
 
 flickr.URL = 'https://api.flickr.com/services/rest/?method=flickr.photos.search';
 
+// Send ajax request using jQuery
 flickr.sendRequest = function(loc) {
     VM.imageLoading(true);
     flickr.buildURL(loc.name);
@@ -132,9 +133,10 @@ flickr.buildImageURL = function(photo) {
     return ImageURL;
 };
 
-// Wikipedia API
+// MediaWiki API
 var wiki = {};
 
+// Send ajax request using jQuery
 wiki.sendRequest = function(loc) {
     VM.wikiLoading(true);
     wiki.buildURL(loc.name);
@@ -153,6 +155,7 @@ wiki.sendRequest = function(loc) {
     });
 };
 
+// Constructy the MediaWiki URL for ajax request
 wiki.buildURL = function(loc) {
     wiki.URL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&redirects=1&titles={title}';
     wiki.URL = wiki.URL.replace('{title}', loc);

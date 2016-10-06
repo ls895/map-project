@@ -20,7 +20,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
         <script src="js/ko-calendar.min.js"></script>
     </head>
-    <body>
+    <body class="hide-overflow">
         <nav class="navbar navbar-light bg-faded">
             <a class="navbar-brand">Map of Interest</a>
             <div class="nav navbar-nav">
@@ -28,10 +28,10 @@
                 <a class="nav-item nav-link" data-bind="click: enableTransport" href="#">Transports</a>
             </div>
         </nav>
-        <div class="container-fluid">
+        <div class="container-fluid no-padding">
             <div class="row main">
-                <div class="col-xl-3 col-lg-4 col-md-5 col-xs-12 control-pane places" data-bind="css: {'toggle-left': !placesPage()}">
-                    <div class="row control-pane detail-pane" data-bind="with: activeLocation, css: {'detail-left': showDetail}">
+                <div class="col-xl-3 col-lg-4 col-md-5 col-xs-12 control-pane hide-overflow places" data-bind="css: {'toggle-left': !placesPage()}">
+                    <div class="row control-pane hide-overflow detail-pane" data-bind="with: activeLocation, css: {'detail-left': showDetail}">
                         <div class="col-xs-12">
                             <figure class="figure">
                                 <p data-bind="visible: $root.imageLoading">
@@ -52,7 +52,7 @@
                     <div data-bind="css: {'underlying-gone': showDetail}">
                         <div class="row">
                             <div class="input-group">
-                                <input class="form-control" placeholder="Search Text" data-bind="textInput: filterText, disable: sortMode">
+                                <input class="form-control" placeholder="Filter text here" data-bind="textInput: filterText, disable: sortMode">
                                 <span class="input-group-btn">
                                     <a role="button" class="btn btn-secondary" data-bind="click: editLocation">
                                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
@@ -72,7 +72,7 @@
                         </div>
                         <div class="row" data-bind="visible: editMode">
                             <div class="input-group">
-                                <input class="form-control" placeholder="Add Places" data-bind="textInput: newLocation">
+                                <input class="form-control" placeholder="Add places here" data-bind="textInput: newLocation">
                                 <span class="input-group-btn">
                                     <a role="button" class="btn btn-secondary" data-bind="click: handleAdd">
                                         <i class="fa fa-plus-square-o" aria-hidden="true"></i>
@@ -82,8 +82,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-4 col-md-5 col-xs-12 control-pane transports" data-bind="css: {'toggle-left': !transportPage()}">
-                    <div class="row control-pane detail-pane" data-bind="css: {'detail-left': showDirections}">
+                <div class="col-xl-3 col-lg-4 col-md-5 col-xs-12 control-pane hide-overflow transports" data-bind="css: {'toggle-left': !transportPage()}">
+                    <div class="row control-pane hide-overflow detail-pane" data-bind="css: {'detail-left': showDirections}">
                         <div class="col-xs-12" id="direction"></div>
                     </div>
                     <div class="row" data-bind="css: {'underlying-gone': showDirections}">
@@ -113,7 +113,7 @@
                                         </label>
                                     </div>
                                     <div class="row">
-                                        <div class="col-xs-4 traffic-buttons">
+                                        <div class="col-xs-4 no-padding">
                                             <a role="button" class="row btn btn-secondary btn-sm" data-toggle="collapse" aria-expanded="false" data-bind="attr: {'aria-controls': 'leg' + $index(), href: '#leg' + $index()}">
                                                 Time
                                             </a>
@@ -124,13 +124,13 @@
                                                 Details
                                             </a>
                                         </div>
-                                        <div class="col-xs-8 collapse time-picker" data-bind="attr: {id: 'leg' + $index()}">
+                                        <div class="col-xs-8 collapse no-padding" data-bind="attr: {id: 'leg' + $index()}">
                                             <div data-bind="calendar: transport.time"></div>
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <p class="col-xs-12 transport-text" data-bind="text: 'Time: ' + transport.duration()"></p>
-                                        <p class="col-xs-12 transport-text" data-bind="text: 'Distance: ' + transport.distance()"></p>
+                                        <p class="col-xs-12 no-padding" data-bind="text: 'Time: ' + transport.duration()"></p>
+                                        <p class="col-xs-12 no-padding" data-bind="text: 'Distance: ' + transport.distance()"></p>
                                     </div>
                                 </div>
                             </li>

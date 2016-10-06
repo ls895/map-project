@@ -137,9 +137,7 @@ ko.bindingHandlers.sortable = {
                 update: function(event, ui) {
                     var loc = ko.dataFor(ui.item[0]);
                     var newIndex = ui.item.index();
-                    console.log('update 1 newIndex ' + newIndex)
                     var oldIndex = locations.indexOf(loc);
-                    console.log('update 1 oldIndex ' + oldIndex)
                     if (oldIndex != newIndex) {
                         var c = locations();
                         locations([]);
@@ -193,22 +191,6 @@ var ViewModel = function() {
 
     self.locations = locations;
 
-    self.photoArray = ko.observableArray([]);
-
-    self.editLocation = function() {
-        if (self.editMode()) {
-            self.editMode(false);
-            self.enableFilter();
-        } else {
-            self.editMode(true);
-            self.disableFilter();
-        }
-    };
-
-    self.detailedDirections = function() {
-        self.showDirections(true);
-    };
-
     self.openInfoWindow = function() {
         self.thumbnail('');
         self.activeLocation(this);
@@ -234,10 +216,6 @@ var ViewModel = function() {
             loc.infoWindow.close();
             loc.infoWindow = null;
         }
-    };
-
-    self.setWikiContent = function(loc, extract) {
-        loc.wikiExtract(extract);
     };
 
     self.dropMarker = function() {
@@ -269,6 +247,10 @@ var ViewModel = function() {
         }
     };
 
+    self.setCenter = function(loc) {
+        map.setCenter(loc.position);
+    };
+
     // Use ko.computed to return a proper array everytime when there is a filter text entered
     self.createComputedList = function() {
         self.filteredLocations = ko.computed(function() {
@@ -294,8 +276,14 @@ var ViewModel = function() {
         });
     };
 
-    self.setCenter = function(loc) {
-        map.setCenter(loc.position);
+    self.editLocation = function() {
+        if (self.editMode()) {
+            self.editMode(false);
+            self.enableFilter();
+        } else {
+            self.editMode(true);
+            self.disableFilter();
+        }
     };
 
     // Create a new location object and add to the locations observable array
@@ -313,7 +301,7 @@ var ViewModel = function() {
             gmap.searchPlace(loc);
             self.newLocation('');
         } else {
-            console.log('Input field cannot be empty');
+            window.alert('Input field cannot be empty');
         }
     };
 
@@ -369,6 +357,14 @@ var ViewModel = function() {
         loc.transport.duration(obj.duration);
         loc.transport.distance(obj.distance);
         loc.transport.time.directionOK(true);
+    };
+
+    self.detailedDirections = function() {
+        self.showDirections(true);
+    };
+
+    self.setWikiContent = function(loc, extract) {
+        loc.wikiExtract(extract);
     };
 
     self.closeDetail = function() {
