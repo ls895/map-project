@@ -88,6 +88,8 @@ __Main Map__:
 
 Clicking on a marker has the same effect as clicking directly on a location on the places page (bringing up a info window and the detail page).
 
+Click on the resize button (double arrow) at bottom of viewport to resize/ rezoom the map based on the distribution of the map markers.
+
 ###Frameworks and libraries###
 
 The following libraries, APIs and information sources are utilized in the site:
