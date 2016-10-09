@@ -1,4 +1,4 @@
-/* global google, locations, VM, ko, $ */
+/* global google, VM, ko, $ */
 
 // Google Map API
 var map;
@@ -8,17 +8,19 @@ var gmap = {};
 // Initiate Google Map, view model and apply Knockout bindings once Google Map API is loaded
 gmap.init = function() {
     map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 0, lng: 180},
+        center: {lat: 0, lng: 0},
         zoom: 13
     });
     gmap.service = new google.maps.places.PlacesService(map);
     gmap.gdirection = new google.maps.DirectionsService();
-    gmap.gdisplay = new google.maps.DirectionsRenderer;
+    gmap.gdisplay = new google.maps.DirectionsRenderer();
     gmap.gdisplay.setMap(map);
     gmap.gdisplay.setPanel(document.getElementById("direction"));
+    // Allows Google Map API services in view model functions with boolean observable set to true
+    VM.googleReady(true);
     VM.initiateMarkers();
     VM.createComputedList();
-    VM.setCenter(locations()[0]);
+    VM.setBounds();
     ko.applyBindings(VM);
 };
 
@@ -87,6 +89,13 @@ gmap.direction = function(origin, dest, type) {
     });
 };
 
+// On error callback if Google Map API fails to load so application runs in semi mode
+gmap.onError = function() {
+    window.alert('Unable to load Google Maps. Application now starts in semi mode without Google Maps related functionality.');
+    VM.createComputedList();
+    ko.applyBindings(VM);
+};
+
 // Flickr API
 var flickr = {};
 
@@ -103,16 +112,17 @@ flickr.sendRequest = function(loc) {
     }).done((function(loc) {
         return function(data) {
             var photo = data.photos.photo;
-            VM.thumbnail(flickr.buildImageURL(photo[0]));
+            var thumbnail = flickr.buildImageURL(photo[0]);
+            VM.setThumbnail(loc, thumbnail);
             VM.imageLoading(false);
         };
-    })(loc)).fail(function() {
-        window.alert('Flickr Image for location: ' + loc.name + ' cannot be loaded. Try again later.');
+    })(loc)).fail(function(xhr, status, error) {
+        window.alert('Flickr Image for location: ' + loc.name + ' cannot be loaded due to reason: ' + status + '. Try again later.');
     });
 };
 
 // Construct the flickr URL for ajax request
-flickr.buildURL = function (loc) {
+flickr.buildURL = function(loc) {
     flickr.URL += ('&api_key=' + flickr.API_KEY);
     flickr.URL += '&format=json';
     flickr.URL += '&nojsoncallback=1';
@@ -142,7 +152,8 @@ wiki.sendRequest = function(loc) {
     wiki.buildURL(loc.name);
     $.ajax({
         url: wiki.URL,
-        dataType: 'jsonp'
+        dataType: 'jsonp',
+        timeout: 5000
     }).done((function(loc) {
         return function(data) {
             var pages = data.query.pages;
@@ -150,8 +161,13 @@ wiki.sendRequest = function(loc) {
             VM.setWikiContent(loc, extract);
             VM.wikiLoading(false);
         };
-    })(loc)).fail(function() {
-        window.alert('Wikipedia content for ' + loc.name + ' cannot be loaded. Try again later.');
+    })(loc)).fail(function(xhr, status, error) {
+        // 5000ms timeout for handling miscellaneous jsonp request errors
+        if (status === 'timeout') {
+            window.alert('Request timeout. Try again later.');
+        } else {
+            window.alert('Wikipedia content for ' + loc.name + ' cannot be loaded due to reason: ' + status + '. Try again later.');
+        }
     });
 };
 

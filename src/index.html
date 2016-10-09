@@ -4,28 +4,19 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Map of Interest for UK</title>
-        <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&v=3&libraries=places&callback=gmap.init"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/css/bootstrap.min.css">
         <link rel="stylesheet" href="css/ko-calendar.min.css">
         <!-- build:css inline ../dist/css/style.min.css -->
         <link rel="stylesheet" href="css/style.css">
         <!-- /build -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
-        <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&libraries=places"></script>-->
-        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-        <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
-        <script src="js/jquery.ui.touch-punch.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/js/bootstrap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
-        <script src="js/ko-calendar.min.js"></script>
     </head>
     <body class="hide-overflow">
         <nav class="navbar navbar-light bg-faded">
             <a class="navbar-brand">Map of Interest</a>
             <div class="nav navbar-nav">
                 <a class="nav-item nav-link" data-bind="click: enablePlaces" href="#">Places<span class="sr-only">(current)</span></a>
-                <a class="nav-item nav-link" data-bind="click: enableTransport" href="#">Transports</a>
+                <a class="nav-item nav-link" data-bind="if: googleReady, click: enableTransport" href="#">Transports</a>
             </div>
         </nav>
         <div class="container-fluid no-padding">
@@ -33,18 +24,18 @@
                 <div class="col-xl-3 col-lg-4 col-md-5 col-xs-12 control-pane hide-overflow places" data-bind="css: {'toggle-left': !placesPage()}">
                     <div class="row control-pane hide-overflow detail-pane" data-bind="with: activeLocation, css: {'detail-left': showDetail}">
                         <div class="col-xs-12">
+                            <p data-bind="visible: $root.imageLoading">
+                                <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+                                Image loading. Please Wait.
+                            </p>
                             <figure class="figure">
-                                <p data-bind="visible: $root.imageLoading">
-                                    <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
-                                    Image loading. Please Wait.
-                                </p>
-                                <img class="figure-img img-fluid img-rounded" data-bind="attr: {src: $root.thumbnail}">
+                                <img class="figure-img img-fluid img-rounded" data-bind="attr: {src: thumbnail}" alt="Thumbnail">
                                 <figcaption class="figure-caption text-xs-right" data-bind="text: name"></figcaption>
-                                <p>Image provided by Flickr</p>
                             </figure>
-                            <p>
-                                <i class="fa fa-spinner fa-spin" aria-hidden="true" data-bind="visible: $root.wikiLoading"></i>
-                                Textual information provided by Wikipedia
+                            <p>Image provided by Flickr</p>
+                            <p data-bind="visible: $root.wikiLoading">
+                                <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+                                Textual information provided by Wikipedia.
                             </p>
                             <p class="lead" data-bind="text: wikiExtract"></p>
                         </div>
@@ -63,7 +54,7 @@
                         <div class="row">
                             <ul class="col-xs-12 list" data-bind="foreach: filteredLocations, sortable: locations">
                                 <li class="row">
-                                    <h6 class="col-xs-10 location-name", data-bind="text: name, click: $root.openInfoWindow"></h6>
+                                    <h6 class="col-xs-10 location-name" data-bind="text: name, click: $root.openInfoWindow"></h6>
                                     <a role="button" class="btn btn-secondary btn-sm trash" data-bind="visible: $root.editMode, disable: $root.sortMode, click: $root.handleDelete">
                                         <i class="fa fa-trash-o" aria-hidden="true"></i>
                                     </a>
@@ -93,7 +84,7 @@
                         </p>
                         <ul class="col-xs-12 list" data-bind="foreach: filteredLocations, sortable: locations">
                             <li class="row">
-                                <h6 class=" location-name", data-bind="text: name"></h6>
+                                <h6 class=" location-name" data-bind="text: name"></h6>
                                 <div  data-bind="if: $index() < ($root.locations().length - 1)">
                                     <div class="row custom-controls-stacked">
                                         <label class="col-xs-4 custom-control custom-radio">
@@ -146,20 +137,31 @@
         </div>
         <nav class="navbar navbar-light bg-faded footer-pa">
             <div class="nav navbar-nav footer-nav">
-            <a class="nav-item nav-link" data-bind="click: closeLast" href="#">
-                <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                <span class="sr-only">(current)</span>
-            </a>
-            <a class="nav-item nav-link map-button" data-bind="click: showMap" href="#">
-                <i class="fa fa-map-o" aria-hidden="true"></i>
-            </a>
+                <a class="nav-item nav-link" data-bind="click: closeLast" href="#">
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                    <span class="sr-only">(current)</span>
+                </a>
+                <a class="nav-item nav-link map-button" data-bind="if: googleReady, click: showMap" href="#">
+                    <i class="fa fa-map-o" aria-hidden="true"></i>
+                </a>
+                <a class="nav-item nav-link" data-bind="if: googleReady, click: setBounds" href="#">
+                    <i class="fa fa-expand" aria-hidden="true"></i>
+                </a>
             </div>
         </nav>
-        <!-- build:js inline ../dist/js/app.min.js -->
-        <script src="js/app.js"></script>
-        <!-- /build -->
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+        <script src="js/jquery.ui.touch-punch.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+        <script src="js/ko-calendar.min.js"></script>
         <!-- build:js inline ../dist/js/api.min.js -->
         <script src="js/api.js"></script>
         <!-- /build -->
+        <!-- build:js inline ../dist/js/app.min.js -->
+        <script src="js/app.js"></script>
+        <!-- /build -->
+        <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&v=3&libraries=places&callback=gmap.init" onerror="gmap.onError()"></script>
     </body>
 </html>

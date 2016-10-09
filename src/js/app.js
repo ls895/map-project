@@ -161,7 +161,8 @@ ko.bindingHandlers.sortable = {
 var ViewModel = function() {
     var self = this;
 
-    self.thumbnail = ko.observable();
+    // Boolean observable to determine whether Google Map API is loaded to control availability of google map services in view model functions
+    self.googleReady = ko.observable(false);
 
     self.editMode = ko.observable(false);
 
@@ -192,18 +193,22 @@ var ViewModel = function() {
     self.locations = locations;
 
     self.openInfoWindow = function() {
-        self.thumbnail('');
         self.activeLocation(this);
-        for (var i = 0; i < locations().length; i++) {
-            self.closeInfoWindow(locations()[i]);
+        if (self.googleReady()) {
+            for (var i = 0; i < locations().length; i++) {
+                self.closeInfoWindow(locations()[i]);
+            }
+            this.infoWindow = new google.maps.InfoWindow({
+                content: '<p class="lead">' + this.name + '</p>'
+            });
+            // Open correct info window, drop a marker animation and send relative flickr and wiki ajax requests for the location
+            this.infoWindow.open(map, this.marker);
+            self.dropMarker.call(this);
+            self.setCenter(this);
+            var bounds = new google.maps.LatLngBounds();
+            bounds.extend(this.marker.getPosition());
+            map.fitBounds(bounds);
         }
-        this.infoWindow = new google.maps.InfoWindow({
-            content: '<p class="lead">' + this.name + '</p>'
-        });
-        // Open correct info window, drop a marker animation and send relative flickr and wiki ajax requests for the location
-        this.infoWindow.open(map, this.marker);
-        self.dropMarker.call(this);
-        self.setCenter(this);
         wiki.sendRequest(this);
         flickr.sendRequest(this);
         self.enablePlaces();
@@ -250,30 +255,57 @@ var ViewModel = function() {
     self.setCenter = function(loc) {
         map.setCenter(loc.position);
     };
+    
+    self.setBounds = function() {
+        var bounds = new google.maps.LatLngBounds();
+        for (var i = 0; i < locations().length; i++) {
+            bounds.extend(locations()[i].marker.getPosition());
+        }
+        map.fitBounds(bounds);
+    };
 
     // Use ko.computed to return a proper array everytime when there is a filter text entered
     self.createComputedList = function() {
-        self.filteredLocations = ko.computed(function() {
-            var target = self.filterText().toLowerCase();
-            var against = locations();
-            if (!target) {
-                for (var i = 0; i < against.length; i++) {
-                    self.setMarkerVisible(against[i], true);
-                }
-                return locations();
-            } else {
-                return ko.utils.arrayFilter(against, function(loc) {
-                    var isContain = (loc.name.toLowerCase().indexOf(target) >= 0);
-                    if (isContain) {
-                        return true;
-                    } else {
-                        self.closeInfoWindow(loc);
-                        self.setMarkerVisible(loc, false);
-                        return false;
+        if (self.googleReady()) {
+            self.filteredLocations = ko.computed(function() {
+                var target = self.filterText().toLowerCase();
+                var against = locations();
+                if (!target) {
+                    for (var i = 0; i < against.length; i++) {
+                        self.setMarkerVisible(against[i], true);
                     }
-                });
-            }
-        });
+                    return locations();
+                } else {
+                    return ko.utils.arrayFilter(against, function(loc) {
+                        var isContain = (loc.name.toLowerCase().indexOf(target) >= 0);
+                        if (isContain) {
+                            return true;
+                        } else {
+                            self.closeInfoWindow(loc);
+                            self.setMarkerVisible(loc, false);
+                            return false;
+                        }
+                    });
+                }
+            });
+        } else {
+            self.filteredLocations = ko.computed(function() {
+                var target = self.filterText().toLowerCase();
+                var against = locations();
+                if (!target) {
+                    return locations();
+                } else {
+                    return ko.utils.arrayFilter(against, function(loc) {
+                        var isContain = (loc.name.toLowerCase().indexOf(target) >= 0);
+                        if (isContain) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
+                }
+            });            
+        }
     };
 
     self.editLocation = function() {
@@ -297,8 +329,13 @@ var ViewModel = function() {
                 duration: ko.observable(''),
                 distance: ko.observable('')
             };
+            loc.thumbnail = ko.observable();
             loc.wikiExtract = ko.observable();
-            gmap.searchPlace(loc);
+            if (self.googleReady()) {
+                gmap.searchPlace(loc);
+            } else {
+                self.addLocation(loc);
+            }
             self.newLocation('');
         } else {
             window.alert('Input field cannot be empty');
@@ -310,8 +347,10 @@ var ViewModel = function() {
     };
 
     self.handleDelete = function() {
-        self.setMarkerVisible(this, false);
-        self.closeInfoWindow(this);
+        if (self.googleReady()) {
+            self.setMarkerVisible(this, false);
+            self.closeInfoWindow(this);
+        }
         locations.remove(this);
     };
 
@@ -365,6 +404,10 @@ var ViewModel = function() {
 
     self.setWikiContent = function(loc, extract) {
         loc.wikiExtract(extract);
+    };
+    
+    self.setThumbnail = function(loc, thumbnail) {
+        loc.thumbnail(thumbnail);
     };
 
     self.closeDetail = function() {
