@@ -384,7 +384,7 @@ var ViewModel = function() {
     };
 
     self.requestDirection = function() {
-        this.directionOK = ko.observable(false);
+        this.transport.time.directionOK(false);
         var origin = this;
         var index = locations.indexOf(origin);
         var dest = locations()[index + 1];
