@@ -23,104 +23,82 @@ TimeModel.prototype.strings = {
     time: ["AM", "PM"]
 };
 
-// The default hardcoded locations available for the application
-var locations = ko.observableArray([
-    {
-        name: 'HMS Belfast',
-        position: {lat: 51.506579, lng: -0.08138899999994464},
-        transport: {
-            time: new TimeModel(),
-            type: 'TRANSIT',
-            duration: ko.observable(''),
-            distance: ko.observable('')
-        },
-        wikiExtract: ko.observable(),
-        thumbnail: ko.observable()
-    },
-    {
-        name: 'Big Ben',
-        position: {lat: 51.50072919999999, lng: -0.12462540000001354},
-        transport: {
-            time: new TimeModel(),
-            type: 'TRANSIT',
-            duration: ko.observable(''),
-            distance: ko.observable('')
-        },
-        wikiExtract: ko.observable(),
-        thumbnail: ko.observable()
-    },
-    {
-        name: 'Westminster Bridge',
-        position: {lat: 51.5008638, lng: -0.12196449999999004},
-        transport: {
-            time: new TimeModel(),
-            type: 'TRANSIT',
-            duration: ko.observable(''),
-            distance: ko.observable('')
-        },
-        wikiExtract: ko.observable(),
-        thumbnail: ko.observable()
-    },
-    {
-        name: 'London Eye',
-        position: {lat: 51.503324, lng: -0.1195430000000215},
-        transport: {
-            time: new TimeModel(),
-            type: 'TRANSIT',
-            duration: ko.observable(''),
-            distance: ko.observable('')
-        },
-        wikiExtract: ko.observable(),
-        thumbnail: ko.observable()
-    },
-    {
-        name: 'Oxford Street',
-        position: {lat: 51.5149255, lng: -0.14482590000000073},
-        transport: {
-            time: new TimeModel(),
-            type: 'TRANSIT',
-            duration: ko.observable(''),
-            distance: ko.observable('')
-        },
-        wikiExtract: ko.observable(),
-        thumbnail: ko.observable()
-    },
-    {
-        name: 'London School of Economics',
-        position: {lat: 51.5144077, lng: -0.11737659999994321},
-        transport: {
-            time: new TimeModel(),
-            type: 'TRANSIT',
-            duration: ko.observable(''),
-            distance: ko.observable('')
-        },
-        wikiExtract: ko.observable(),
-        thumbnail: ko.observable()
-    },
-    {
-        name: 'King\'s College London',
-        position: {lat: 51.51148639999999, lng: -0.11599699999999302},
-        transport: {
-            time: new TimeModel(),
-            type: 'TRANSIT',
-            duration: ko.observable(''),
-            distance: ko.observable('')
-        },
-        wikiExtract: ko.observable(),
-        thumbnail: ko.observable()
-    },
-    {
-        name: 'Old Royal Naval College',
-        position: {lat: 51.4827375, lng: -0.008513499999935448},
-        transport: {
-            time: new TimeModel(),
-            type: 'TRANSIT',
-            duration: ko.observable(''),
-            distance: ko.observable('')
-        },
-        wikiExtract: ko.observable(),
-        thumbnail: ko.observable()
+// The location constructor function
+var Location = function(name, position) {
+    this.name = name;
+    this.position = position;
+    this.transport = {
+        time: new TimeModel(),
+        type: 'TRANSIT',
+        duration: ko.observable(''),
+        distance: ko.observable('')
+    };
+    this.wikiExtract = ko.observable();
+    this.thumbnail = ko.observable();
+};
+
+Location.prototype.dropMarker = function() {
+    this.marker.setAnimation(null);
+    this.marker.setAnimation(google.maps.Animation.DROP);
+};
+
+Location.prototype.openInfoWindow = function() {
+    this.infoWindow = new google.maps.InfoWindow({
+        content: '<p class="lead">' + this.name + '</p>'
+    });
+    this.infoWindow.open(map, this.marker);
+};
+
+Location.prototype.closeInfoWindow = function() {
+    this.marker.setAnimation(null);
+    if (this.infoWindow) {
+        this.infoWindow.close();
+        this.infoWindow = null;
     }
+};
+
+Location.prototype.setMarkerVisible = function(trueFalse) {
+    this.marker.setVisible(trueFalse);
+};
+
+Location.prototype.addMarker = function() {
+    this.marker = new google.maps.Marker({
+        position: this.position,
+        map: map,
+        animation: google.maps.Animation.DROP
+    });
+    // Closure is used to allow each marker's click listener callback refer to the correct location object
+    this.marker.addListener('click', (function(loc) {
+        return function() {
+            loc.openInfoWindow();
+        };
+    }(this)));
+};
+
+Location.prototype.setWikiContent = function(extract) {
+    this.wikiExtract(extract);
+};
+
+Location.prototype.setThumbnail = function(url) {
+    this.thumbnail(url);
+};
+
+Location.prototype.setDirections = function(obj) {
+    this.transport.duration(obj.duration);
+    this.transport.distance(obj.distance);
+    this.transport.time.directionOK(true);
+};
+
+// Default hardcoded locations
+var locations = ko.observableArray([
+    new Location('HMS Belfast', {lat: 51.506579, lng: -0.08138899999994464}),
+    new Location('Big Ben', {lat: 51.50072919999999, lng: -0.12462540000001354}),
+    new Location('Westminster Bridge', {lat: 51.5008638, lng: -0.12196449999999004}),
+    new Location('London Eye', {lat: 51.503324, lng: -0.1195430000000215}),
+    new Location('Oxford Street', {lat: 51.5149255, lng: -0.14482590000000073}),
+    new Location('London School of Economics', {lat: 51.5144077, lng: -0.11737659999994321}),
+    new Location('King\'s College London', {lat: 51.51148639999999, lng: -0.11599699999999302}),
+    new Location('Old Royal Naval College', {lat: 51.4827375, lng: -0.008513499999935448})
 ]);
 
 // Custom Knockout binding to allow sorting locations on the list and altering their relative order
@@ -158,7 +136,7 @@ ko.bindingHandlers.sortable = {
 };
 
 // View model that provides logic and connection between View and Model
-var ViewModel = function() {
+var BaseViewModel = function() {
     var self = this;
 
     // Boolean observable to determine whether Google Map API is loaded to control availability of google map services in view model functions
@@ -196,14 +174,10 @@ var ViewModel = function() {
         self.activeLocation(this);
         if (self.googleReady()) {
             for (var i = 0; i < locations().length; i++) {
-                self.closeInfoWindow(locations()[i]);
+                locations()[i].closeInfoWindow();
             }
-            this.infoWindow = new google.maps.InfoWindow({
-                content: '<p class="lead">' + this.name + '</p>'
-            });
-            // Open correct info window, drop a marker animation and send relative flickr and wiki ajax requests for the location
-            this.infoWindow.open(map, this.marker);
-            self.dropMarker.call(this);
+            this.openInfoWindow();
+            this.dropMarker();
             self.setCenter(this);
             var bounds = new google.maps.LatLngBounds();
             bounds.extend(this.marker.getPosition());
@@ -215,40 +189,9 @@ var ViewModel = function() {
         self.showDetail(true);
     };
 
-    self.closeInfoWindow = function(loc) {
-        loc.marker.setAnimation(null);
-        if (loc.infoWindow) {
-            loc.infoWindow.close();
-            loc.infoWindow = null;
-        }
-    };
-
-    self.dropMarker = function() {
-        this.marker.setAnimation(null);
-        this.marker.setAnimation(google.maps.Animation.DROP);
-    };
-
-    self.setMarkerVisible = function(loc, trueFalse) {
-        loc.marker.setVisible(trueFalse);
-    };
-
-    self.addMarker = function(loc) {
-        loc.marker = new google.maps.Marker({
-            position: loc.position,
-            map: map,
-            animation: google.maps.Animation.DROP
-        });
-        // Closure is used to allow each marker's click listener callback refer to the correct location object
-        loc.marker.addListener('click', (function(loc) {
-            return function() {
-                self.openInfoWindow.call(loc);
-            };
-        }(loc)));
-    };
-
     self.initiateMarkers = function() {
         for (var i = 0; i < locations().length; i++) {
-            self.addMarker(locations()[i]);
+            locations()[i].addMarker();
         }
     };
 
@@ -272,17 +215,18 @@ var ViewModel = function() {
                 var against = locations();
                 if (!target) {
                     for (var i = 0; i < against.length; i++) {
-                        self.setMarkerVisible(against[i], true);
+                        against[i].setMarkerVisible(true);
                     }
                     return locations();
                 } else {
                     return ko.utils.arrayFilter(against, function(loc) {
                         var isContain = (loc.name.toLowerCase().indexOf(target) >= 0);
                         if (isContain) {
+                            loc.setMarkerVisible(true);
                             return true;
                         } else {
-                            self.closeInfoWindow(loc);
-                            self.setMarkerVisible(loc, false);
+                            loc.closeInfoWindow();
+                            loc.setMarkerVisible(false);
                             return false;
                         }
                     });
@@ -321,37 +265,43 @@ var ViewModel = function() {
     // Create a new location object and add to the locations observable array
     self.handleAdd = function() {
         if (self.newLocation().length > 0) {
-            var loc = {};
-            loc.name = self.newLocation();
-            loc.transport = {
-                time: new TimeModel(),
-                type: 'TRANSIT',
-                duration: ko.observable(''),
-                distance: ko.observable('')
-            };
-            loc.thumbnail = ko.observable();
-            loc.wikiExtract = ko.observable();
             if (self.googleReady()) {
-                gmap.searchPlace(loc);
+                gmap.searchPlace(self.newLocation());
             } else {
-                self.addLocation(loc);
+                self.createLocation(self.newLocation(), {});
             }
-            self.newLocation('');
         } else {
             window.alert('Input field cannot be empty');
         }
     };
-
+    
+    self.createLocation = function(placeName, position) {
+        var loc = new Location(placeName, position);
+        self.addLocation(loc);
+    };
+    
     self.addLocation = function(loc) {
+        if (self.googleReady()) {
+            self.addLocationToMap(loc);
+        }
         locations.push(loc);
+    };
+    
+    self.addLocationToMap = function(loc) {
+        loc.addMarker();
+        self.setCenter(loc);
     };
 
     self.handleDelete = function() {
         if (self.googleReady()) {
-            self.setMarkerVisible(this, false);
-            self.closeInfoWindow(this);
+            this.setMarkerVisible(false);
+            this.closeInfoWindow();
         }
-        locations.remove(this);
+        self.removeLocation(this);
+    };
+    
+    self.removeLocation = function(loc) {
+        locations.remove(loc);
     };
 
     self.enableTransport = function() {
@@ -375,7 +325,7 @@ var ViewModel = function() {
     };
 
     self.enableFilter = function() {
-        VM.sortMode(false);
+        self.sortMode(false);
     };
 
     self.disableFilter = function() {
@@ -393,23 +343,21 @@ var ViewModel = function() {
     };
 
     self.setDirections = function(loc, obj) {
-        loc.transport.duration(obj.duration);
-        loc.transport.distance(obj.distance);
-        loc.transport.time.directionOK(true);
+        loc.setDirections(obj);
+    };
+
+    self.setWikiContent = function(loc, extract) {
+        loc.setWikiContent(extract);
+    };
+    
+    self.setThumbnail = function(loc, url) {
+        loc.setThumbnail(url);
     };
 
     self.detailedDirections = function() {
         self.showDirections(true);
     };
-
-    self.setWikiContent = function(loc, extract) {
-        loc.wikiExtract(extract);
-    };
     
-    self.setThumbnail = function(loc, thumbnail) {
-        loc.thumbnail(thumbnail);
-    };
-
     self.closeDetail = function() {
         self.showDetail(false);
     };
@@ -420,4 +368,4 @@ var ViewModel = function() {
     };
 };
 
-var VM = new ViewModel();
+var VM = new BaseViewModel();

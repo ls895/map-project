@@ -1,0 +1,135 @@
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+html,
+body,
+.main,
+.map-container,
+#map {
+    height: 100%;
+}
+
+body,
+.control-pane,
+.map-pane {
+    min-width: 320px;
+}
+
+ul {
+    list-style: none;
+    margin-top: 1rem;
+}
+
+li,
+.location-name {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.hide-overflow {
+    overflow-x: hidden;
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.navbar {
+    height: 50px;
+}
+
+.container-fluid,
+.control-pane,
+.map-pane {
+    height: calc(100% - 100px);
+}
+
+.detail-pane {
+    height: 100%;
+}
+
+.container-fluid {
+    margin: 0;
+}
+
+.control-pane {
+    position: absolute;
+    z-index: 1;
+    background-color: #fff;
+    overflow-y: scroll;
+    -webkit-transition: .3s ease all;
+    transition: .3s ease all;
+}
+
+.detail-pane {
+    width: 100%;
+    z-index: 10;
+    left: -100%;
+}
+
+.map-pane {
+    position: absolute;
+    z-index: 0;
+}
+
+.detail-left {
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
+}
+
+.toggle-left {
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%);
+}
+
+.trash {
+    vertical-align: sub;
+}
+
+.no-padding {
+    padding: 0;
+}
+
+.underlying-gone {
+    display: none;
+}
+
+.footer-pa {
+    text-align: center;
+}
+
+.footer-nav {
+    display: inline-block;
+    float: none;
+}
+
+@media (min-width: 768px) {
+    .map-pane {
+        left: 41.667%;
+    }
+
+    .places,
+    .transports,
+    .map-pane {
+        padding: 0;
+    }
+
+    .map-button {
+        display: none !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .map-pane {
+        left: 33.333%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .map-pane {
+        left: 25%;
+    }
+}

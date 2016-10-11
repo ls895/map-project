@@ -22,24 +22,26 @@ gmap.init = function() {
     VM.createComputedList();
     VM.setBounds();
     ko.applyBindings(VM);
+    authInit();
 };
 
 // Search for corresponding place using the Google Map API Place library
-gmap.searchPlace = function(loc) {
+gmap.searchPlace = function(placeName) {
     var request = {
-        query: loc.name
+        query: placeName
     };
     gmap.service.textSearch(request, function(results, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
-            gmap.getDetail(results[0].place_id, loc);
+            var placeId = results[0].place_id;
+            gmap.getDetail(placeName, placeId);
         } else {
-            window.alert('Google places search for ' + loc.name + ' was not successful for the following reason: ' + status);
+            window.alert('Google places search for ' + placeName + ' was not successful for the following reason: ' + status);
         }
     });
 };
 
 // Search for the correspondig latlng value based on the Place library return
-gmap.getDetail = function(id, loc) {
+gmap.getDetail = function(placeName, id) {
     var request = {
         placeId: id
     };
@@ -49,10 +51,7 @@ gmap.getDetail = function(id, loc) {
                 lat: place.geometry.location.lat(),
                 lng: place.geometry.location.lng()
             };
-            loc.position = position;
-            VM.addMarker(loc);
-            VM.addLocation(loc);
-            VM.setCenter(loc);
+            VM.createLocation(placeName, position);
         } else {
             window.alert('Google places detailed search for ' + id + ' was not successful for the following reason: ' + status);
         }

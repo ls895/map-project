@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Map of Interest for UK</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css">
+        <link rel="stylesheet" href="react/css/style.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+        <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/live/0.5/firebase-ui-auth.css" />
+    </head>
+    <body class="hide-overflow">
+        <div id="container"></div>
+        <!--<nav class="navbar navbar-light bg-faded">-->
+        <!--    <a class="navbar-brand">Map of Interest</a>-->
+        <!--    <div class="nav navbar-nav">-->
+        <!--        <a class="nav-item nav-link" data-bind="click: enablePlaces" href="#">Places<span class="sr-only">(current)</span></a>-->
+        <!--        <a class="nav-item nav-link" data-bind="if: googleReady, click: enableTransport" href="#">Transports</a>-->
+        <!--        <a class="nav-item nav-link pull-xs-right" id="sign-in" href="#">Sign-In</a>-->
+        <!--    </div>-->
+        <!--</nav>-->
+        <!--<div class="container-fluid no-padding">-->
+        <!--    <div class="row main">-->
+        <!--        <div class="col-xl-3 col-lg-4 col-md-5 col-xs-12 control-pane hide-overflow places" data-bind="css: {'toggle-left': !placesPage()}">-->
+        <!--            <div class="row control-pane hide-overflow detail-pane" data-bind="with: activeLocation, css: {'detail-left': showDetail}">-->
+        <!--                <div class="col-xs-12">-->
+        <!--                    <p data-bind="visible: $root.imageLoading">-->
+        <!--                        <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>-->
+        <!--                        Image loading. Please Wait.-->
+        <!--                    </p>-->
+        <!--                    <figure class="figure">-->
+        <!--                        <img class="figure-img img-fluid img-rounded" data-bind="attr: {src: thumbnail}" alt="Thumbnail">-->
+        <!--                        <figcaption class="figure-caption text-xs-right" data-bind="text: name"></figcaption>-->
+        <!--                    </figure>-->
+        <!--                    <p>Image provided by Flickr</p>-->
+        <!--                    <i class="fa fa-spinner fa-spin" aria-hidden="true" data-bind="visible: $root.wikiLoading"></i>-->
+        <!--                    <p>Textual information provided by Wikipedia.</p>-->
+        <!--                    <p class="lead" data-bind="text: wikiExtract"></p>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--            <div data-bind="css: {'underlying-gone': showDetail}">-->
+        <!--                <div class="row">-->
+        <!--                    <div class="input-group">-->
+        <!--                        <input class="form-control" placeholder="Filter text here" data-bind="textInput: filterText, disable: sortMode">-->
+        <!--                        <span class="input-group-btn">-->
+        <!--                            <a role="button" class="btn btn-secondary" data-bind="click: editLocation">-->
+        <!--                                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>-->
+        <!--                            </a>-->
+        <!--                        </span>-->
+        <!--                    </div>-->
+        <!--                </div>-->
+        <!--                <div class="row">-->
+        <!--                    <ul class="col-xs-12 list" data-bind="foreach: filteredLocations, sortable: locations">-->
+        <!--                        <li class="row">-->
+        <!--                            <h6 class="col-xs-10 location-name" data-bind="text: name, click: $root.openInfoWindow"></h6>-->
+        <!--                            <a role="button" class="btn btn-secondary btn-sm trash" data-bind="visible: $root.editMode, disable: $root.sortMode, click: $root.handleDelete">-->
+        <!--                                <i class="fa fa-trash-o" aria-hidden="true"></i>-->
+        <!--                            </a>-->
+        <!--                        </li>-->
+        <!--                    </ul>-->
+        <!--                </div>-->
+        <!--                <div class="row" data-bind="visible: editMode">-->
+        <!--                    <div class="input-group">-->
+        <!--                        <input class="form-control" placeholder="Add places here" data-bind="textInput: newLocation">-->
+        <!--                        <span class="input-group-btn">-->
+        <!--                            <a role="button" class="btn btn-secondary" data-bind="click: handleAdd">-->
+        <!--                                <i class="fa fa-plus-square-o" aria-hidden="true"></i>-->
+        <!--                            </a>-->
+        <!--                        </span>-->
+        <!--                    </div>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--        </div>-->
+        <!--        <div class="col-xl-3 col-lg-4 col-md-5 col-xs-12 control-pane hide-overflow transports" data-bind="css: {'toggle-left': !transportPage()}">-->
+        <!--            <div class="row control-pane hide-overflow detail-pane" data-bind="css: {'detail-left': showDirections}">-->
+        <!--                <div class="col-xs-12" id="direction"></div>-->
+        <!--            </div>-->
+        <!--            <div class="row" data-bind="css: {'underlying-gone': showDirections}">-->
+        <!--                <p class="col-xs-12 list" data-bind="visible: $root.directionLoading">-->
+        <!--                    <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>-->
+        <!--                    Directions loading. Please Wait.-->
+        <!--                </p>-->
+        <!--                <ul class="col-xs-12 list" data-bind="foreach: filteredLocations, sortable: locations">-->
+        <!--                    <li class="row">-->
+        <!--                        <h6 class=" location-name" data-bind="text: name"></h6>-->
+        <!--                        <div  data-bind="if: $index() < ($root.locations().length - 1)">-->
+        <!--                            <div class="row custom-controls-stacked">-->
+        <!--                                <label class="col-xs-4 custom-control custom-radio">-->
+        <!--                                    <input class="custom-control-input" type="radio" value="DRIVING" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">-->
+        <!--                                    <span class="custom-control-indicator"></span>-->
+        <!--                                    <span class="custom-control-description">Driving</span>-->
+        <!--                                </label>-->
+        <!--                                <label class="col-xs-4 custom-control custom-radio">-->
+        <!--                                    <input class="custom-control-input" type="radio" value="TRANSIT" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">-->
+        <!--                                    <span class="custom-control-indicator"></span>-->
+        <!--                                    <span class="custom-control-description">Public Transit</span>-->
+        <!--                                </label>-->
+        <!--                                <label class="col-xs-4 custom-control custom-radio">-->
+        <!--                                    <input class="custom-control-input" type="radio" value="WALKING" data-bind="checked: transport.type, attr: {name: 'leg' + $index()}">-->
+        <!--                                    <span class="custom-control-indicator"></span>-->
+        <!--                                    <span class="custom-control-description">Walking</span>-->
+        <!--                                </label>-->
+        <!--                            </div>-->
+        <!--                            <div class="row">-->
+        <!--                                <div class="col-xs-4 no-padding">-->
+        <!--                                    <a role="button" class="row btn btn-secondary btn-sm" data-toggle="collapse" aria-expanded="false" data-bind="attr: {'aria-controls': 'leg' + $index(), href: '#leg' + $index()}">-->
+        <!--                                        Time-->
+        <!--                                    </a>-->
+        <!--                                    <a role="button" class="row btn btn-secondary btn-sm" data-bind="click: $root.requestDirection">-->
+        <!--                                        Request-->
+        <!--                                    </a>-->
+        <!--                                    <a role="button" class="row btn btn-secondary btn-sm" data-bind="visible: transport.time.directionOK, click: $root.detailedDirections">-->
+        <!--                                        Details-->
+        <!--                                    </a>-->
+        <!--                                </div>-->
+        <!--                                <div class="col-xs-8 collapse no-padding" data-bind="attr: {id: 'leg' + $index()}">-->
+        <!--                                    <div data-bind="calendar: transport.time"></div>-->
+        <!--                                </div>-->
+        <!--                            </div>-->
+        <!--                            <div class="row">-->
+        <!--                                <p class="col-xs-12 no-padding" data-bind="text: 'Time: ' + transport.duration()"></p>-->
+        <!--                                <p class="col-xs-12 no-padding" data-bind="text: 'Distance: ' + transport.distance()"></p>-->
+        <!--                            </div>-->
+        <!--                        </div>-->
+        <!--                    </li>-->
+        <!--                </ul>-->
+        <!--            </div>-->
+        <!--        </div>-->
+        <!--        <div class="col-xl-9 col-lg-8 col-md-7 col-xs-12 hide-overflow map-pane">-->
+        <!--            <div class="row map-container">-->
+        <!--                <div class="col-xs-12" id="map"></div>-->
+        <!--            </div>-->
+        <!--        </div>-->
+        <!--    </div>-->
+        <!--</div>-->
+        <!--<nav class="navbar navbar-light bg-faded footer-pa">-->
+        <!--    <div class="nav navbar-nav footer-nav">-->
+        <!--        <a class="nav-item nav-link" data-bind="click: closeLast" href="#">-->
+        <!--            <i class="fa fa-chevron-left" aria-hidden="true"></i>-->
+        <!--            <span class="sr-only">(current)</span>-->
+        <!--        </a>-->
+        <!--        <a class="nav-item nav-link map-button" data-bind="if: googleReady, click: showMap" href="#">-->
+        <!--            <i class="fa fa-map-o" aria-hidden="true"></i>-->
+        <!--        </a>-->
+        <!--        <a class="nav-item nav-link" data-bind="if: googleReady, click: setBounds" href="#">-->
+        <!--            <i class="fa fa-expand" aria-hidden="true"></i>-->
+        <!--        </a>-->
+        <!--    </div>-->
+        <!--</nav>-->
+        <script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
+        <script>
+          // Initialize Firebase
+          var config = {
+            apiKey: "AIzaSyC99KJxf2fKHs80BkUtwvI58RM05dfW5WU",
+            authDomain: "udacity-neighbor-map.firebaseapp.com",
+            databaseURL: "https://udacity-neighbor-map.firebaseio.com",
+            storageBucket: "udacity-neighbor-map.appspot.com",
+            messagingSenderId: "921650015202"
+          };
+          firebase.initializeApp(config);
+        </script>
+        <script src="https://www.gstatic.com/firebasejs/ui/live/0.5/firebase-ui-auth.js"></script>
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js"></script>
+        <script src="https://unpkg.com/react@15.3.2/dist/react-with-addons.min.js"></script>
+        <script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.min.js"></script>
+        <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+        <script src="https://unpkg.com/remarkable@1.7.1/dist/remarkable.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.30.5/react-bootstrap.min.js"></script>
+        <script>
+            var Alert = ReactBootstrap.Alert;
+        </script>
+        <script src="https://unpkg.com/redux@3.6.0/dist/redux.min.js"></script>
+        <script type="text/babel" src="react/js/model.js"></script>
+        <!--<script type="text/babel" src="react/js/view-controller.js"></script>-->
+        <!--<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&v=3&libraries=places&callback=gmap.init" onerror="gmap.onError()"></script>-->
+    </body>
+</html>

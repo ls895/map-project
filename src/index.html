@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="css/style.css">
         <!-- /build -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+        <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/live/0.5/firebase-ui-auth.css" />
     </head>
     <body class="hide-overflow">
         <nav class="navbar navbar-light bg-faded">
@@ -17,6 +18,7 @@
             <div class="nav navbar-nav">
                 <a class="nav-item nav-link" data-bind="click: enablePlaces" href="#">Places<span class="sr-only">(current)</span></a>
                 <a class="nav-item nav-link" data-bind="if: googleReady, click: enableTransport" href="#">Transports</a>
+                <a class="nav-item nav-link pull-xs-right" id="sign-in" href="#">Sign-In</a>
             </div>
         </nav>
         <div class="container-fluid no-padding">
@@ -147,6 +149,19 @@
                 </a>
             </div>
         </nav>
+        <script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
+        <script>
+          // Initialize Firebase
+          var config = {
+            apiKey: "AIzaSyC99KJxf2fKHs80BkUtwvI58RM05dfW5WU",
+            authDomain: "udacity-neighbor-map.firebaseapp.com",
+            databaseURL: "https://udacity-neighbor-map.firebaseio.com",
+            storageBucket: "udacity-neighbor-map.appspot.com",
+            messagingSenderId: "921650015202"
+          };
+          firebase.initializeApp(config);
+        </script>
+        <script src="https://www.gstatic.com/firebasejs/ui/live/0.5/firebase-ui-auth.js"></script>
         <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
         <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
         <script src="js/jquery.ui.touch-punch.min.js"></script>
@@ -160,6 +175,7 @@
         <!-- build:js inline ../dist/js/app.min.js -->
         <script src="js/app.js"></script>
         <!-- /build -->
+        <script src="js/auth.js"></script>
         <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdXuXKhFBWQhgXCNsi2_eA4o7fOmoIHjI&v=3&libraries=places&callback=gmap.init" onerror="gmap.onError()"></script>
     </body>
 </html>

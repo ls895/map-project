@@ -39,7 +39,8 @@ module.exports = function(grunt) {
         files: {
           'dist/js/jquery.ui.touch-punch.min.js': 'src/js/jquery.ui.touch-punch.min.js',
           'dist/js/ko-calendar.min.js': 'src/js/ko-calendar.min.js',
-          'dist/css/ko-calendar.min.css': 'src/css/ko-calendar.min.css'
+          'dist/css/ko-calendar.min.css': 'src/css/ko-calendar.min.css',
+          'dist/js/auth.js': 'src/js/auth.js'
         }
       }
     }
